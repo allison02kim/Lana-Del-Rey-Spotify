@@ -1,0 +1,980 @@
+---
+title: "Lana Del Rey Energy"
+author: "Allison Kim"
+output: 
+    html_document: 
+      toc: yes
+      toc_float: yes
+      code_folding: show
+      theme: journal
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, tidy=TRUE,
+                      warning = FALSE)
+```
+
+## INTRODUCTION
+
+The main goal of this project is to build a model to predict the energy level of one of Lana Del Rey's songs.
+
+![Lana Del Rey](https://i.pinimg.com/originals/0d/c6/77/0dc6771ed97ef61feca0f78cf4c787a1.jpg)
+
+### Who is Lana Del Rey?
+
+Elizabeth Woolridge Grant (born June 21, 1985), known professionally as Lana Del Rey, is an American singer-songwriter. She is the recipient of various accolades, including two Brit Awards, two Billboard Women in Music, two MTV Europe Music Awards, and a Satellite Award, in addition to nominations for six Grammy Awards and a Golden Globe Award. Rolling Stone placed Del Rey in their list of 200 Greatest Singers of All Time (2023), and also Rolling Stone UK named her The Greatest American Songwriter of the 21st century (2023).Time magazine named Del Rey one of the 100 most influential people in the world in 2012.
+
+### What are we trying to do?
+
+The question I would like to answer is: How can we predict the energy level of one of Lana Del Rey's songs? Based on given information about musical elements such as the acousticness, the valence, tempo, etc. I think it would be possible to predict the energy level of a song. Lana Del Rey's music has a wide range of sounds, and I think it would be interesting to examine how certain musical qualities can give us insight into how energetic one of her songs is.
+
+## LOADING PACKAGES AND DATA
+
+Let's start off by loading all necessary packages and data. This data is taken from [Kaggle](https://www.kaggle.com/datasets/arthurboari/lana-del-rey-spotify-data) and it contains information on all of Lana Del Rey's songs from 2011-2021.
+
+```{r, warning=FALSE, message=FALSE}
+# Load packages
+
+library(tidyverse)
+library(dplyr)
+library(tidymodels)
+library(readr)
+library(kknn)
+library(janitor)
+library(ISLR)
+library(discrim)
+library(poissonreg)
+library(glmnet)
+library(corrr)
+library(corrplot)
+library(randomForest)
+library(xgboost)
+library(rpart.plot)
+library(vip)
+library(ranger)
+library(tidytext)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
+theme_set(theme_bw())
+
+# Read in data
+
+Lana <- read_csv("C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/data/unprocessed/Lana Del Rey Spotify Data.csv")
+tidymodels_prefer()
+head(Lana) %>% 
+  kable() %>% 
+  kable_styling(full_width = F) %>% 
+  scroll_box(width = "100%", height = "200px")
+```
+
+## TIDYING THE DATA
+
+Let's check the shape of the data.
+
+```{r}
+# Check shape of Lana
+
+dim(Lana)
+```
+
+The data contains 593 rows and 36 columns which means there are 593 total songs and 36 variables. 593 songs seems abnormally high. Let's check how many *distinct* albums and tracks are included in this data.
+
+```{r}
+# Check number of unique albums
+
+count(distinct(Lana, album_name))
+```
+
+```{r}
+# Check number of unique tracks
+
+count(distinct(Lana, track_name))
+```
+
+There are 14 albums and 121 unique song names, wow that's a lot of repeats in the data!! There are a few albums with repeat song names, for example I expect Born to Die and Born to Die-Paradise Edition to have a few of the same song names. This data, however, likely includes some repeat song names in the *same* album, which we don't want. In order to fix this issue, let's selects all of the *unique* track names in each of the 14 albums.
+
+```{r}
+# Keeping only the unique tracks in each unique album
+
+Lana1<-Lana%>%
+  distinct(album_name, track_name, .keep_all = TRUE)
+
+# Check shape
+
+dim(Lana1)
+```
+
+We've now narrowed it down to 233 tracks, meaning no repeat songs in each album. This means that there were 593-233=360 repeat songs that we got rid of and 233-121=112 repeat songs that were in *different* albums, we could keep these for the purpose of analyzing all songs in all of Lana Del Rey's albums, however, this could skew our data. Repeated songs would contain the same values for each of the variables, so we will get rid of these as well leaving us with 121 unique songs.
+
+```{r}
+# Keep only unique tracks
+
+Lana2 <- Lana %>%
+  filter(!duplicated(track_name))
+
+# Kheck shape
+
+dim(Lana2)
+```
+Now let's check all the names of the albums.
+
+```{r}
+# Print unique album names
+
+albums <- unique(Lana2$album_name)
+albums
+```
+
+We can see that there are 5 versions of Born to Die and 2 of Ultraviolence. Let's combine these, since we already got rid of the repeated songs.
+
+```{r}
+# Merge different versions of same album
+
+Lana3 <- Lana2 %>%
+  mutate(album_name = ifelse(str_detect(album_name, "Born To Die"), 
+                             "Born to Die (all versions)", 
+                             album_name)) %>% 
+  mutate(album_name = ifelse(str_detect(album_name, "Ultraviolence"), 
+                             "Ultraviolence (all versions)", 
+                             album_name))
+
+# Count how many updated albums
+
+count(distinct(Lana3, album_name))
+```
+
+Great! We've successfully combined all Born to Die versons and all Ultraviolence versions. Now we have 7 albums to work with.
+
+### Variable Selection
+
+There are still 36 variables in the data. Let's narrow that down to just the ones that will help us predict the `energy` variable. But first let's define `energy` in this context:
+
+-   `energy`: Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy.
+
+The variables I have chosen to predict this are:
+
+-   `danceability`: Describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.
+
+-   `loudness`: The overall loudness of a track in decibels (dB). Loudness values are averaged across the entire track and are useful for comparing relative loudness of tracks. Values typical range between -60 and 0 db.
+
+-   `acousticness`: A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 1.0 represents high confidence the track is acoustic.
+
+-   `instrumentalness`: Predicts whether a track contains no vocals. "Ooh" and "aah" sounds are treated as instrumental in this context. Rap or spoken word tracks are clearly "vocal". The closer the instrumentalness value is to 1.0, the greater likelihood the track contains no vocal content. Values above 0.5 are intended to represent instrumental tracks, but confidence is higher as the value approaches 1.0.
+
+-   `tempo`: The overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.
+
+-   `speechiness`: Detects the presence of spoken words in a track. The more exclusively speech-like the recording, the closer to 1.0 the attribute value. Values above 0.66 describe tracks that are probably made entirely of spoken words. Values below 0.33 most likely represent music and other non-speech-like tracks.
+
+-   `liveness`: Detects the presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live. A value above 0.8 provides strong likelihood that the track is live.
+
+-   `valence`: A measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).
+
+All of these variables take on continuous values, so this problem will be a regression problem.
+
+```{r}
+# Select only variables of interest
+
+Lana4 <- Lana3 %>% 
+  select(c("track_name", "album_name", "danceability", "energy", "loudness",  "acousticness", "instrumentalness", "tempo", "speechiness", "liveness", "valence"))
+```
+
+For the sake of clarity and exploratory data analysis, I've decided to keep the variables `track_name` and `album_name`
+
+-   `track_name`: The name of the track
+
+-   `album_name`: The name of the album that the track is from
+
+### Missigness
+
+To deal with potential missing data let's check if our tidied data has any missing values.
+
+```{r}
+# Check how many missing values
+
+sum(is.na(Lana4))
+```
+
+There is no missing data! We can now move on to finalizing the data.
+
+```{r}
+# Create final dataset
+
+write_csv(Lana4, "C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/data/processed/Lana_final.csv")
+
+# Assign final data to a variable and read in
+
+Lana_data<-read_csv('C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/data/processed/Lana_final.csv', show_col_types = FALSE)
+Lana_data %>% 
+  kable() %>% 
+  kable_styling(full_width = F) %>% 
+  scroll_box(width = "100%", height = "200px")
+```
+
+
+## EXPLORATORY DATA ANALYSIS
+
+Let's print a summary of our data to get a better look at how the variables are distributed.
+
+```{r}
+# Print summary of data
+
+Lana_data %>% 
+  summary()
+```
+
+### Visual EDA
+
+#### Distribution of Energy
+
+I want to get a better look at the distribution of our outcome `energy`.
+
+```{r}
+# Histogram of energy
+
+ggplot(Lana_data, aes(energy))+
+  geom_histogram(bins=30, color="black", fill="lavender")+
+  labs(title="Distrubution of Energy")+
+  xlab("Energy")+
+  ylab("Count")
+```
+
+Based on this plot, we can see that `energy` is pretty well centered but slightly skewed right. There is a wide range of energy levels and not too many high or low values. Most songs are between .2 and .75. Based on the summary data, the median energy is 0.4600 and the mean is 0.4592.
+
+#### Energy by Album
+
+One factor that I think may affect the energy levels of a song is the album. Each album has a different theme and feel, so I expect that this could affect how energetic each song on the album is.
+
+```{r}
+# Box plot of energy  for each album
+
+Lana_data %>% 
+  ggplot(aes(x = energy, y = album_name, fill=album_name)) +
+  geom_boxplot() +
+  labs(
+    title = "Box Plot of Energy by Album",
+    y = "Album", 
+    x = "Energy") +
+  scale_fill_manual(values = c("pink", "brown", "lavender", "magenta", "cyan", "aquamarine", "aliceblue"))+
+    theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank()) 
+```
+
+As expected, the distribution of Energy differs greatly depending on the album. We can see that for the album Blue Banisters, the median energy is about .2 while for Born to Die, the median energy is about .65.
+
+#### Correlation Plot
+
+Now let's look at the relationships between the variables.
+
+```{r}
+# Only look at the numeric variables
+
+Lana_numeric <- Lana_data %>%
+  select_if(is.numeric)
+
+# Correlation matrix
+
+Lana_cor <- cor(Lana_numeric)
+
+# Visualization of correlation matrix
+
+Lana_corrplot <- corrplot(Lana_cor, method = "circle", addCoef.col = 1, number.cex = 0.7)
+```
+
+We can see in this plot that `energy` is highly correlated with `loudness` and `acousticness`. There is a correlation of .81 between `energy` and `loudness` which means that as the loudness of a song increases so does energy. This makes sense because I would expect that the louder a song is, the more energetic it is. There is a correlation of -.8 between `acousticness` and `energy` which means that the more acoustic a song is, the less energetic it is. This makes sense because acoustic songs are typically more mellow and calm.
+
+#### Loudness
+
+Since we observed a high correlation between `energy` and `loudness`, let's take a closer look at this relationship
+
+```{r}
+# Scatter plot of energy vs loudness
+
+Lana_data %>% 
+  ggplot(aes(x=energy, y=loudness)) + 
+  geom_jitter(width = 0.5, size = 1) +
+  geom_smooth(method = "lm", se =F, col="purple") +
+  labs(title = "Energy vs. Loudness")
+```
+
+We are now able to visualize this positive relationship that we inferred from the correlation plot.
+
+#### Acousticness
+
+Now let's do the same for acousticness.
+
+```{r}
+# Scatter plot of energy vs acousticness
+
+Lana_data %>% 
+  ggplot(aes(x=energy, y=acousticness)) + 
+  geom_jitter(width = 0.5, size = 1) +
+  geom_smooth(method = "lm", se =F, col="purple") +
+  labs(title = "Energy vs. Acousticness")
+```
+
+Again, there is an apparent negative relationship between the two variables.
+
+## SETTING UP THE MODELS
+
+In order to set up to start fitting models, we must split our data, create a recipe, and create folds for our K-fold cross validation
+
+### Data Splitting
+
+The first step of this process is to split the data into a training and a testing set. The training set is used to train the models while the best model is fit to the testing set to see how well it performs on new data. This is to avoid overfitting. I will be splitting the model into a 70/30 split, stratifying on our outcome `energy`.
+
+```{r}
+# Setting the seed for reproducibility
+
+set.seed(0124)
+
+# Splitting the data (70/30 split, stratify on energy)
+
+Lana_split <- initial_split(Lana_data, prop = 0.7, strata = energy)
+Lana_train <- training(Lana_split)
+Lana_test <- testing(Lana_split)
+```
+
+### Creating Our Recipe
+
+Our next step is to create a recipe for our models. We will use the 8 predictor variables previously mentioned. Finally, we will normalize the variables by centering and scaling. 
+
+```{r}
+# Creating recipe
+
+Lana_recipe <- recipe(energy ~loudness + acousticness + instrumentalness + tempo + speechiness + liveness + valence + danceability, data = Lana_train) %>% 
+
+  # Normalizing
+  
+  step_center(all_predictors()) %>% 
+  step_scale(all_predictors())
+```
+
+### K-Fold Cross Validation
+
+Next, we must create folds for K-fold cross validation. This process is done by splitting the data into the k folds with each fold being a testing set and the other k-1 folds being the training set. The number of folds I have chosen is 10.
+
+```{r}
+# Create 10 folds
+
+Lana_folds <- vfold_cv(Lana_train, v = 10, strata = energy)
+```
+
+## BUILDING OUR MODELS
+
+For my models, I will be using a Ridge Regression, Polynomial Regression, K-nearest neighbors, Random Forest, Boosted Trees, and Pruned Decision Tree. I will be using the metric RMSE to compare these models. The RMSE tells us how far the predictions are from the true values, so a lower RMSE would signify a more accurate model. 
+
+### Fitting the Models
+
+#### Specify Model Engine
+
+The first step to fitting the models is to specify the model engine.
+
+```{r}
+# SPECIFY MODEL ENGINE
+
+# RIDGE REGRESSION
+# Tuning penalty and setting mixture to 0 to specify ridge
+
+ridge_model <- linear_reg(mixture = 0, 
+                         penalty = tune()) %>% 
+  set_mode("regression") %>% 
+  set_engine("glmnet")
+
+# POLYNOMIAL REGRESSION
+# Adjusting the recipe because the tuning parameter must be added in the recipe for polynomial regression
+
+poly_recipe <- Lana_recipe %>% 
+  step_poly(loudness, acousticness, instrumentalness, tempo, speechiness, liveness, valence, 
+            degree = tune())
+
+poly_model <- linear_reg() %>% 
+  set_mode("regression") %>% 
+  set_engine("lm")
+
+# K NEAREST NEIGHBORS
+# Tuning the number of neighbors
+
+knn_model <- nearest_neighbor(neighbors = tune()) %>% 
+  set_mode("regression") %>% 
+  set_engine("kknn")
+
+# RANDOM FOREST
+# Tuning mtry (number of predictors), trees, and min_n (number of minimum values in each node), and setting importance="impurity"
+
+rf_model <- rand_forest(mtry = tune(), 
+                       trees = tune(), 
+                       min_n = tune()) %>% 
+  set_engine("ranger", importance = "impurity") %>% 
+  set_mode("regression")
+
+# BOOSTED TREES
+# Tuning mtry, trees, learn_rate (the learning rate)
+
+boosted_model <- boost_tree(mtry = tune(),
+                           trees = tune(),
+                           learn_rate = tune()) %>%
+  set_engine("xgboost") %>%
+  set_mode("regression")
+
+# PRUNED DECISION TREE
+# Tuning cost_complexity
+
+prune_model <- decision_tree(cost_complexity = tune()) %>%
+  set_engine("rpart") %>%
+  set_mode("regression")
+```
+
+#### Set up Workflow
+
+Next, we set up the workflow by adding the model and the recipe.
+
+```{r}
+# SET UP WORKFLOW
+
+# RIDGE REGRESSION
+
+ridge_workflow <- workflow() %>% 
+  add_recipe(Lana_recipe) %>% 
+  add_model(ridge_model)
+
+# POLYNOMIAL REGRESSION
+
+poly_workflow <- workflow() %>% 
+  add_model(poly_model) %>% 
+  add_recipe(poly_recipe)
+
+# K NEAREST NEIGHBORS
+
+knn_workflow <- workflow() %>% 
+  add_model(knn_model) %>% 
+  add_recipe(Lana_recipe)
+
+# RANDOM FOREST
+
+rf_workflow <- workflow() %>% 
+  add_recipe(Lana_recipe) %>% 
+  add_model(rf_model)
+
+# BOOSTED TREES
+
+boosted_workflow <- workflow() %>% 
+  add_recipe(Lana_recipe) %>% 
+  add_model(boosted_model)
+
+# PRUNED DECISION TREE
+
+prune_workflow <- workflow() %>% 
+  add_recipe(Lana_recipe) %>% 
+  add_model(prune_model)
+```
+
+#### Create Grid
+
+We must create a tuning grid to specify the ranges of the parameters we want to tune and the number of levels.
+
+```{r}
+# CREATE GRID
+
+# RIDGE REGRESSION
+
+ridge_grid <- grid_regular(penalty(range = c(-5, 5)),
+                           levels = 30)
+
+# POLYNOMIAL REGRESSION
+
+poly_grid <- grid_regular(degree(range = c(1,7)), 
+                          levels = 7)
+
+# K NEAREST NEIGHBORS
+
+knn_grid <- grid_regular(neighbors(range = c(1,10)), 
+                         levels = 10)
+
+# RANDOM FOREST
+
+rf_grid <- grid_regular(mtry(range = c(1, 6)), 
+                        trees(range = c(100,800)), 
+                        min_n(range = c(5,20)), 
+                        levels = 5)
+
+# BOOSTED TREES
+
+boosted_grid <- grid_regular(mtry(range = c(1, 5)), 
+                             trees(range = c(5, 400)),
+                             learn_rate(range = c(-0.1, 0)),
+                             levels = 5)
+
+#PRUNED DECISION TREE
+
+prune_grid <- grid_regular(cost_complexity(range=c(-3, -1)),
+                             levels = 10)
+```
+
+#### Tune the Models
+
+Now, we tune the model, specify the workflow, the folds, and the tuning grid.
+
+```{r}
+#TUNE MODELS
+
+#RIDGE REGRESSION
+
+ridge_tune <- tune_grid(
+  ridge_workflow,
+  resamples = Lana_folds,
+  grid = ridge_grid
+)
+
+# POLYNOMIAL REGRESSION
+
+poly_tune <- tune_grid(
+  poly_workflow,
+  resamples = Lana_folds,
+  grid = poly_grid
+)
+
+# K NEAREST NEIGHBORS
+
+knn_tune <- tune_grid(
+    knn_workflow,
+    resamples = Lana_folds,
+    grid = knn_grid
+)
+
+# RANDOM FOREST
+
+rf_tune <- tune_grid(
+  rf_workflow,
+  resamples = Lana_folds,
+  grid = rf_grid
+)
+
+# BOOSTED TREES
+
+boosted_tune <- tune_grid(
+  boosted_workflow,
+  resamples = Lana_folds,
+  grid = boosted_grid
+)
+
+# PRUNED DECISION TREE
+
+prune_tune <- tune_grid(
+  prune_workflow,
+  resamples = Lana_folds,
+  grid = prune_grid
+)
+```
+
+
+#### Save and Load Files
+
+Save and load in the tuned models.
+
+```{r}
+# SAVE AND LOAD IN FILES
+
+# RIDGE REGRESSION
+
+save(ridge_tune, file = "C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/ridge.rda")
+load("C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/ridge.rda")
+
+# POLYNOMIAL REGRESSION
+
+save(poly_tune, file = "C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/poly.rda")
+load("C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/poly.rda")
+
+# K NEAREST NEIGHBORS
+
+save(knn_tune, file = "C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/knn.rda")
+load("C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/knn.rda")
+
+# RANDOM FOREST
+
+save(rf_tune, file = "C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/rf.rda")
+load("C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/rf.rda")
+
+# BOOSTED TREES
+
+save(boosted_tune, file = "C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/boosted.rda")
+load("C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/boosted.rda")
+
+# PRUNED DECISION TREE
+
+save(boosted_tune, file = "C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/prune.rda")
+load("C:/Users/allis/OneDrive/Desktop/Akim-FinalProject/tuned_models/prune.rda")
+```
+
+
+#### Select the Best Model
+
+The best values for each model will now be selected, using the metric RMSE. 
+
+```{r}
+# SELECT BEST MODEL
+
+# RIDGE REGRESSION
+
+best_ridge <- select_best(ridge_tune, metric="rmse")
+
+# POLYNOMIAL REGRESSION
+
+best_poly <- select_best(poly_tune)
+
+# K NEAREST NEIGHBORS
+
+best_knn<-select_by_one_std_err(knn_tune, desc(neighbors), metric = "rmse")
+
+# RANDOM FOREST
+
+best_rf <- select_best(rf_tune, metric="rmse")
+
+# BOOSTED TREES
+
+best_boosted <- select_best(boosted_tune, metric = "rmse")
+
+# PRUNED DECISON TREE
+
+best_prune <- select_best(prune_tune, metric='rmse')
+```
+
+#### Fit Best Model
+
+Now the best models must be fit using the whole training data set.
+
+```{r}
+# FIT BEST MODEL TO TRAINING
+
+# RIDGE REGRESSION
+
+ridge_final <- finalize_workflow(ridge_workflow, best_ridge)
+ridge_final_fit <-fit(ridge_final, data=Lana_train)
+
+# POLYNOMIAL REGRESSION
+
+poly_final <- finalize_workflow(poly_workflow, best_poly)
+poly_final_fit <- fit(poly_final, data = Lana_train)
+
+# K NEAREST NEIGHBORS
+
+knn_final <- finalize_workflow(knn_workflow, best_knn)
+knn_final_fit<-fit(knn_final, Lana_train)
+
+# RANDOM FOREST
+
+rf_final <- finalize_workflow(rf_workflow, best_rf)
+rf_final_fit <- fit(rf_final, Lana_train)
+
+# BOOSTED TREES
+
+boosted_final <- finalize_workflow(boosted_workflow, best_boosted)
+boosted_final_fit<-fit(boosted_final, Lana_train)
+
+# PRUNED DECISION TREE
+
+prune_final <- finalize_workflow(prune_workflow, best_prune)
+prune_final_fit<-fit(prune_final, Lana_train)
+```
+
+#### Calculate Performance
+
+These final models can now be applied to the testing data to assess their abilities.
+
+```{r}
+# CALCULATE PERFORMANCE
+
+# RIDGE REGRESSION
+
+ridge_rmse <- augment(ridge_final_fit, new_data=Lana_test) %>% 
+  rmse(truth=energy, estimate=.pred)%>%
+  select(.estimate)
+
+# POLYNOMIAL REGRESSION
+
+poly_metrics <- metric_set(rmse, rsq)
+poly_rmse <- augment(poly_final_fit, new_data = Lana_test) %>%
+  poly_metrics(energy, .pred)%>% 
+  slice(1)%>%
+  select(.estimate)
+
+# K NEAREST NEIGHBORS
+
+knn_rmse <- augment(knn_final_fit, new_data = Lana_test) %>%
+  rmse(truth = energy, estimate = .pred)%>%
+  select(.estimate)
+
+# RANDOM FOREST
+
+rf_rmse <- augment(rf_final_fit, new_data = Lana_test) %>%
+  rmse(truth = energy, estimate = .pred)%>%
+  select(.estimate)
+
+# BOOSTED TREES
+
+boosted_rmse <- augment(boosted_final_fit, new_data = Lana_test) %>%
+  rmse(truth = energy, estimate = .pred)%>%
+  select(.estimate)
+
+#PRUNED DECISION TREE
+
+prune_rmse <- augment(prune_final_fit, new_data = Lana_test) %>%
+  rmse(truth = energy, estimate = .pred) %>% 
+  select(.estimate)
+```
+
+## RESULTS
+
+Now we will view and compare the results of our models to see which model has performed the best.
+
+```{r}
+# Create data frame of all RMSE
+
+Model = c("Ridge Reg", "Poly Reg", "KNN", "Rand Forest", "Boosted Trees", "Pruned Tree")
+  
+RMSE = c(ridge_rmse$.estimate, poly_rmse$.estimate, knn_rmse$.estimate, rf_rmse$.estimate, boosted_rmse$.estimate, prune_rmse$.estimate)
+
+Lana_results <- tibble(Model = Model,
+                      RMSE = RMSE)
+
+Lana_results <- Lana_results %>% 
+  dplyr::arrange(RMSE)
+
+Lana_results
+```
+
+It seems like the Ridge Regression has performed the best! All of our models performed relatively well as the RMSE range from only .141 to .089. This means that the worst model's (pruned decision tree) predictions differ from the actual values by .141 while the best model's predictions differ from the actual values by .089.
+
+Now let's visualize this result.
+
+```{r}
+# Creating a bar plot of the RMSE values
+
+ggplot(Lana_results, aes(x=Model, y=RMSE)) +
+  geom_bar(stat = "identity", aes(fill = Model)) +
+  scale_fill_manual(values = c("lavender", "magenta", "cyan", "aquamarine", "aliceblue", "lightblue")) +
+  theme(legend.position = "none") +
+  labs(title = "Comparing RMSE by Model")
+```
+
+### Autoplots
+
+In order to visualize the effects of the tuned parameters, let's look at the autoplots. Note that a lower RMSE signifies a better model.
+
+#### Ridge Regression
+
+```{r}
+autoplot(ridge_tune, metric = 'rmse')
+```
+
+In this plot, we can see that the model performs better at lower penalty values. 
+
+#### Random Forest
+
+```{r}
+autoplot(rf_tune, metric = 'rmse')
+```
+
+In this plot we can see that the model performs better at higher randomly selected predictor values, less trees, and lower minimal node size.
+
+
+#### Polynomial Regression
+
+```{r}
+autoplot(poly_tune, metric = 'rmse')
+```
+
+In this plot, we can see that the model performs better when the degree is lower.
+
+#### Boosted Trees
+
+```{r}
+autoplot(boosted_tune)
+```
+
+In this plot, we can see that the model performs better at a lowe number of trees, higher number of randomly selected predictors, and it seems to vary across the different learning rates.
+
+#### Pruned Decision Tree
+
+```{r}
+autoplot(prune_tune)
+```
+
+In this plot, we can see that the model performs better as cost complexity decreases. Another visualization for the pruned decision tree is to extract the model fit results and view them with `rpart.plot()`.
+
+```{r}
+# Extract model fit results
+
+prune_final_fit %>%
+  extract_fit_engine() %>%
+  rpart.plot(roundint = FALSE)
+```
+
+## BEST MODELS
+
+### Ridge Regression
+
+Our best model was the Ridge Regression model, as it had the lowest RMSE.
+
+#### Which Fold?
+
+Let's now see which parameters were chosen as the best Ridge Regression model.
+
+```{r}
+# Select the best fold
+
+ridge_tune %>% 
+  collect_metrics() %>% 
+  filter(.metric == "rmse") %>%
+  arrange(mean) %>% 
+  slice(1)
+```
+
+Ridge regression 11 with a penalty of .028 and RMSE of .0893 performed the best.
+
+#### Fit to Training Data
+
+Now we will fit the best model to the training data.
+
+```{r}
+# Fitting to the training data
+
+best_ridge <- select_best(ridge_tune)
+
+final_ridge_model <- finalize_workflow(ridge_workflow, best_ridge)
+
+final_ridge_model<- fit(final_ridge_model, Lana_train)
+```
+
+### Testing the Model
+
+Next, let's test the model to see how it performs on the testing set.
+
+```{r}
+# Collecting the rmse of the model on the testing data
+
+final_ridge_model_test <- augment(final_ridge_model, Lana_test)
+
+rmse(final_ridge_model_test, truth = energy, .pred)
+```
+
+Our model performed the same on the testing set with an RMSE of .0893 as well.
+
+### Random Forest
+
+The Random Forest performed the second best, as it had the second lowest RMSE value.
+
+#### Which Fold?
+
+Let's now see which parameters were chosen as the best Random Forest model.
+
+```{r}
+# Select the best fold
+
+rf_tune %>% 
+  collect_metrics() %>% 
+  filter(.metric == "rmse") %>%
+  arrange(mean) %>% 
+  slice(1)
+```
+
+Random forest 55 with 6 predictors, 100 trees, and a node size of 12 perfomed the best with an RMSE of .0880.
+
+#### Fit to Training Data
+
+Now we will fit the best model to the training data.
+
+```{r}
+# Fitting to the training data
+
+best_rf <- select_best(rf_tune)
+
+final_rf_model <- finalize_workflow(rf_workflow, best_rf)
+
+final_rf_model<- fit(final_rf_model, Lana_train)
+```
+
+#### Testing the Model
+
+Next, let's test the model to see how it performs on the testing set.
+
+```{r}
+# Collecting the rmse of the model on the testing data
+
+final_rf_model_test <- augment(final_rf_model, Lana_test)
+
+rmse(final_rf_model_test, truth = energy, .pred)
+```
+
+It turns out our model performed better on the testing set than on the folds with a RMSE of .0878!
+
+### Variable Importance
+
+Let's check which variables were the most influential in predicting the outcome.
+
+#### Ridge Regression
+
+```{r}
+# Plot the variable importance
+final_ridge_model %>% extract_fit_parsnip() %>% 
+  vip() +
+  theme_minimal()
+```
+
+For the Ridge Regression, the most important variable was `loudness` with `acousticness` as the second most important. The rest of the variables had lower importance in predicting the outcome. In our visual EDA, we saw that energy had a high correlation with both of these variables, so this outcome makes sense.
+
+#### Random Forest
+
+```{r}
+# Plot the variable importance
+
+final_rf_model %>% extract_fit_parsnip() %>% 
+  vip() +
+  theme_minimal()
+```
+
+For the Random Forest, the most important variable was `acousticness` with `loudness` as the second most important. The rest of the variables had very low importance in predicting the outcome. Again, since we saw that energy had a high correlation with both of these variables, this outcome makes sense.
+
+### Predicted vs. Actual
+
+Let's now plot the predicted values vs the actual values. Note that if every observation was predicted accurately the dots would form a straight line.
+
+#### Ridge Regression
+
+```{r}
+# Create plot of predicted vs. actual values
+
+final_ridge_model_test %>% 
+  ggplot(aes(x = energy, y = .pred)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(lty = 2) +
+  theme_minimal()
+```
+
+There is a general straight line trend in this plot signifying that our Ridge Regression was pretty accurate in predicting the observations. This makes sense because we had a relatively low RMSE of .0893 meaning the predicted values are not far off from the actual values.
+
+#### Random Forest
+
+```{r}
+# Create plot of predicted vs. actual values
+
+final_rf_model_test %>% 
+  ggplot(aes(x = energy, y = .pred)) +
+  geom_point(alpha = 0.5) +
+  geom_abline(lty = 2) +
+  theme_minimal()
+```
+
+There is a general straight line trend in this plot signifying that our Random Forest was pretty accurate in predicting the observations. This makes sense because we had a relatively low RMSE of .0911 meaning the predicted values are not far off from the actual values.
+
+## CONCLUSION
+
+Now that we have fit different kinds of model and analyzed them, we know that the best model to predict the energy level of a Lana Del Rey song is the ridge regression. The ridge regression is able to handle multicollinearity, improve model stability, and achieves good generalization performance, so this outcome makes sense. Our specific ridge regression was quite accurate with predicting energy based on our RMSE calculation.
+
+The worst model was the pruned decision tree. The pruned decision tree removes branches and nodes from the decision tree to simplify its structure. As a result, the pruned tree may lack complexity which could explain its poor performance.
+
+Something that I discussed before was the different distributions of energy by album. One thing I could do to improve my models would be to redo them for each album. I think this could lead to higher accuracy, as the distributions of energy differ quite significantly by album. 
+
+Another question I would like to explore is whether this would work as a classification problem. I left out the variable `key_mode` which represents whether the track is major or minor. I think that this variable could help with predicting energy levels, as major keys are typically characterized by higher energy levels. I believe that my model might perform better if I include this variable.
+
+Overall, my Lana Del Rey Energy Model performed better than expected. I initially didn't think that the energy of Lana Del Rey's song would be easy to predict due to the versatility of her music. 

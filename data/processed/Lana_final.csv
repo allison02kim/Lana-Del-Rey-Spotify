@@ -1,0 +1,122 @@
+track_name,album_name,danceability,energy,loudness,acousticness,instrumentalness,tempo,speechiness,liveness,valence
+Born To Die,Born to Die (all versions),0.316,0.636,-6.631,0.186,1.6e-4,171.564,0.0424,0.198,0.4
+Off To The Races,Born to Die (all versions),0.392,0.724,-5.566,0.0633,0.00192,160.09,0.0594,0.407,0.129
+Blue Jeans,Born to Die (all versions),0.565,0.834,-4.472,0.411,0,117.935,0.0622,0.0811,0.49
+Video Games,Born to Die (all versions),0.251,0.256,-9.682,0.812,0,82.29,0.0311,0.0884,0.168
+Diet Mountain Dew,Born to Die (all versions),0.459,0.684,-5.971,0.285,0,175.728,0.0881,0.425,0.605
+National Anthem,Born to Die (all versions),0.538,0.901,-5.999,0.542,1.52e-4,84.951,0.215,0.101,0.423
+Dark Paradise,Born to Die (all versions),0.579,0.636,-8.354,0.117,0,120.041,0.0649,0.172,0.403
+Radio,Born to Die (all versions),0.326,0.843,-5.242,0.219,2.63e-5,75.139,0.0893,0.0877,0.167
+Carmen,Born to Die (all versions),0.506,0.424,-9.568,0.0864,3.76e-4,100.017,0.0317,0.127,0.038
+Million Dollar Man,Born to Die (all versions),0.201,0.586,-5.979,0.494,0,195.767,0.0566,0.0662,0.532
+Summertime Sadness,Born to Die (all versions),0.564,0.649,-6.811,0.051,0,111.949,0.0333,0.121,0.201
+This Is What Makes Us Girls,Born to Die (all versions),0.534,0.837,-6.9,0.101,0.0211,138.04,0.104,0.19,0.423
+Video Games - White Lies C-Mix,Born to Die (all versions),0.603,0.678,-6.108,8.37e-5,0.102,122.494,0.037,0.0775,0.379
+Without You,Born to Die (all versions),0.588,0.579,-8.419,0.702,1.71e-4,111.958,0.0366,0.126,0.603
+Lolita,Born to Die (all versions),0.505,0.939,-4.285,0.0788,3.99e-5,136.02,0.0992,0.339,0.152
+Lucky Ones,Born to Die (all versions),0.347,0.422,-7.187,0.781,6.81e-6,135.038,0.0284,0.182,0.33
+Ride,Born to Die (all versions),0.373,0.686,-5.52,0.128,1.96e-6,93.763,0.034,0.383,0.189
+American,Born to Die (all versions),0.397,0.585,-6.518,0.535,4.38e-4,143.983,0.0359,0.0976,0.18
+Cola,Born to Die (all versions),0.298,0.668,-5.536,0.0699,2.44e-5,110.063,0.0478,0.59,0.121
+Body Electric,Born to Die (all versions),0.245,0.492,-9.397,0.466,0,167.7,0.0593,0.0851,0.104
+Blue Velvet,Born to Die (all versions),0.189,0.317,-8.631,0.812,0.0719,84.809,0.028,0.214,0.251
+Gods & Monsters,Born to Die (all versions),0.352,0.725,-6.463,0.00193,2.73e-6,189.767,0.0656,0.22,0.339
+Yayo,Born to Die (all versions),0.506,0.201,-12.931,0.926,4.11e-4,71.925,0.0294,0.253,0.145
+Bel Air,Born to Die (all versions),0.346,0.42,-11.506,0.864,0.0875,83.56,0.0298,0.901,0.303
+Blue Jeans - Remastered 2011,Born to Die (all versions),0.553,0.828,-4.399,0.432,0,117.948,0.0635,0.0801,0.504
+Burning Desire,Born to Die (all versions),0.481,0.641,-10.8,0.842,0.00454,131.812,0.132,0.134,0.161
+Blue Velvet - Penguin Prison Remix,Born to Die (all versions),0.77,0.602,-10.204,3.18e-4,0.841,112.014,0.0488,0.078,0.525
+Summertime Sadness - Todd Terry Remix,Born to Die (all versions),0.803,0.891,-7.324,0.0134,0.124,124.978,0.0773,0.175,0.514
+National Anthem - bretonLABS Remix,Born to Die (all versions),0.665,0.574,-5.884,0.0292,0.0022,169.972,0.145,0.13,0.459
+Blue Jeans - RAC Mix,Born to Die (all versions),0.71,0.833,-4.186,0.299,0.00691,118.001,0.0466,0.0842,0.397
+Born To Die - Kris Di Angelis 'Love Below' Remix,Born to Die (all versions),0.794,0.687,-8.23,0.0122,0.703,122.997,0.0379,0.0781,0.194
+Video Games - Jakwob and Etherwood Remix,Born to Die (all versions),0.53,0.986,-2.438,0.0014,0.475,154.992,0.0436,0.313,0.426
+Born To Die - Woodkid & The Shoes Remix,Born to Die (all versions),0.577,0.678,-8.847,0.113,0.264,92.988,0.0463,0.308,0.206
+Summertime Sadness [Lana Del Rey vs. Cedric Gervais] - Cedric Gervais Extended Remix,Born to Die (all versions),0.64,0.895,-6.396,0.0405,0.00203,126.004,0.0564,0.047,0.112
+Ride - Photek Remix,Born to Die (all versions),0.581,0.69,-4.15,0.301,0,104.004,0.034,0.153,0.484
+Cruel World,Ultraviolence (all versions),0.325,0.506,-6.398,0.282,5.36e-6,120.505,0.0336,0.124,0.212
+Ultraviolence,Ultraviolence (all versions),0.144,0.541,-7.076,0.278,1.01e-5,79.262,0.038,0.101,0.0899
+Shades Of Cool,Ultraviolence (all versions),0.262,0.482,-6.863,0.554,0.0161,137.918,0.0302,0.244,0.0878
+Brooklyn Baby,Ultraviolence (all versions),0.404,0.664,-6.698,0.542,0.00402,107.747,0.0407,0.11,0.0949
+West Coast,Ultraviolence (all versions),0.527,0.591,-7.664,0.194,0.0194,123.167,0.0396,0.0907,0.461
+Sad Girl,Ultraviolence (all versions),0.345,0.587,-8.346,0.539,0.0731,119.479,0.0364,0.119,0.258
+Pretty When You Cry,Ultraviolence (all versions),0.509,0.547,-6.548,0.399,0,109.436,0.0417,0.215,0.197
+Money Power Glory,Ultraviolence (all versions),0.349,0.525,-6.829,0.583,0,136.762,0.0451,0.35,0.288
+Fucked My Way Up To The Top,Ultraviolence (all versions),0.52,0.69,-5.919,0.601,0.201,129.839,0.0554,0.137,0.182
+Old Money,Ultraviolence (all versions),0.312,0.168,-12.476,0.888,6.59e-6,108.115,0.0332,0.147,0.154
+The Other Woman,Ultraviolence (all versions),0.255,0.468,-6.43,0.822,0.248,111.67,0.0317,0.339,0.175
+West Coast - Radio Mix,Ultraviolence (all versions),0.599,0.525,-7.482,0.0535,0,103.998,0.0302,0.112,0.633
+Black Beauty,Ultraviolence (all versions),0.316,0.53,-7.562,0.272,0.0222,119.37,0.0421,0.099,0.0965
+Guns And Roses,Ultraviolence (all versions),0.536,0.649,-8.944,0.354,0.00515,108.927,0.0448,0.115,0.334
+Florida Kilos,Ultraviolence (all versions),0.266,0.505,-7.809,0.291,4.63e-5,200.755,0.0377,0.108,0.588
+Flipside,Ultraviolence (all versions),0.341,0.37,-9.264,0.871,0.0133,125.961,0.0349,0.101,0.0607
+Honeymoon,Honeymoon,0.169,0.269,-13.265,0.953,0.00828,74.847,0.036,0.111,0.173
+Music To Watch Boys To,Honeymoon,0.4,0.494,-8.04,0.713,3.34e-4,132.016,0.0367,0.238,0.134
+Terrence Loves You,Honeymoon,0.296,0.25,-10.088,0.975,0.0187,102.031,0.0314,0.0988,0.0898
+God Knows I Tried,Honeymoon,0.398,0.428,-8.292,0.846,0.0338,81.017,0.0275,0.185,0.111
+High By The Beach,Honeymoon,0.536,0.486,-11.067,0.244,0.00788,131.988,0.0346,0.12,0.0968
+Freak,Honeymoon,0.287,0.43,-10.014,0.269,5.79e-4,93.984,0.033,0.32,0.109
+Art Deco,Honeymoon,0.282,0.464,-11.112,0.544,0.215,148.345,0.0533,0.111,0.0596
+Burnt Norton - Interlude,Honeymoon,0.28,0.304,-18.57,0.9,0.806,85.765,0.0359,0.135,0.523
+Religion,Honeymoon,0.416,0.459,-9.977,0.813,0.0428,135.689,0.0366,0.102,0.175
+Salvatore,Honeymoon,0.304,0.311,-9.647,0.675,0.00195,117.68,0.0344,0.12,0.115
+The Blackest Day,Honeymoon,0.445,0.522,-8.007,0.363,4.87e-4,107.752,0.0331,0.0797,0.162
+24,Honeymoon,0.284,0.372,-9.821,0.782,1.83e-4,98.181,0.0356,0.103,0.0853
+Swan Song,Honeymoon,0.34,0.361,-11.567,0.636,0.421,81.765,0.0294,0.259,0.0392
+Don't Let Me Be Misunderstood,Honeymoon,0.327,0.351,-10.488,0.316,5.93e-6,80.386,0.0327,0.107,0.063
+Love,Lust For Life,0.527,0.366,-10.943,0.487,0.0023,98.994,0.0277,0.11,0.234
+Lust For Life (with The Weeknd),Lust For Life,0.504,0.655,-8.644,0.604,0.00193,99.982,0.0542,0.364,0.262
+13 Beaches,Lust For Life,0.333,0.389,-9.132,0.539,0.0772,144.204,0.0364,0.163,0.25
+Cherry,Lust For Life,0.449,0.534,-9.493,0.048,0.0011,94.261,0.0494,0.384,0.342
+White Mustang,Lust For Life,0.658,0.46,-8.646,0.456,0.00111,114.801,0.0444,0.0963,0.223
+Summer Bummer (feat. A$AP Rocky & Playboi Carti),Lust For Life,0.76,0.574,-8.57,0.0155,2.02e-5,134.981,0.126,0.199,0.137
+Groupie Love (feat. A$AP Rocky),Lust For Life,0.359,0.6,-7.317,0.113,1.32e-6,175.894,0.0398,0.0952,0.195
+In My Feelings,Lust For Life,0.54,0.674,-6.351,0.0553,0.0608,89.933,0.0802,0.112,0.309
+Coachella - Woodstock In My Mind,Lust For Life,0.535,0.658,-7.425,0.189,4.11e-5,129.835,0.0998,0.0683,0.413
+God Bless America - And All The Beautiful Women In It,Lust For Life,0.374,0.697,-6.544,0.411,0.211,87.96,0.0637,0.122,0.244
+When The World Was At War We Kept Dancing,Lust For Life,0.616,0.605,-7.234,0.097,0.00812,116.031,0.0343,0.165,0.185
+Beautiful People Beautiful Problems (feat. Stevie Nicks),Lust For Life,0.509,0.43,-8.387,0.834,8.54e-4,122.919,0.0325,0.0927,0.128
+Tomorrow Never Came (feat. Sean Ono Lennon),Lust For Life,0.297,0.402,-9.757,0.819,1.81e-4,138.019,0.0346,0.109,0.177
+Heroin,Lust For Life,0.352,0.41,-8.796,0.556,0.0113,118.721,0.0388,0.114,0.0952
+Change,Lust For Life,0.558,0.246,-10.914,0.942,0.00875,85.672,0.0409,0.106,0.303
+Get Free,Lust For Life,0.205,0.472,-10.45,0.498,7.92e-4,203.944,0.0718,0.0953,0.0392
+Norman fucking Rockwell,Norman Fucking Rockwell!,0.215,0.203,-12.65,0.968,0.0585,78.287,0.0346,0.0923,0.143
+Mariners Apartment Complex,Norman Fucking Rockwell!,0.531,0.252,-12.765,0.763,1.33e-4,76.054,0.028,0.104,0.159
+Venice Bitch,Norman Fucking Rockwell!,0.368,0.286,-13.031,0.913,0.177,77.826,0.0294,0.099,0.312
+Fuck it I love you,Norman Fucking Rockwell!,0.534,0.452,-10.732,0.895,0.00165,129.974,0.0359,0.125,0.175
+Doin' Time,Norman Fucking Rockwell!,0.641,0.559,-11.132,0.404,0.00402,144.982,0.0355,0.0937,0.523
+Love song,Norman Fucking Rockwell!,0.384,0.0701,-16.512,0.966,1.7e-4,63.425,0.0367,0.0805,0.288
+Cinnamon Girl,Norman Fucking Rockwell!,0.294,0.337,-10.614,0.814,0.414,91.781,0.036,0.14,0.135
+How to disappear,Norman Fucking Rockwell!,0.538,0.304,-11.79,0.613,6.31e-4,78.997,0.0352,0.164,0.065
+California,Norman Fucking Rockwell!,0.449,0.41,-8.067,0.761,0,123.758,0.0317,0.0631,0.195
+The Next Best American Record,Norman Fucking Rockwell!,0.569,0.354,-9.862,0.616,2.75e-5,108.083,0.0315,0.112,0.118
+The greatest,Norman Fucking Rockwell!,0.443,0.226,-12.507,0.939,0.0201,79.142,0.0359,0.14,0.196
+Bartender,Norman Fucking Rockwell!,0.582,0.102,-14.712,0.924,0,131.773,0.0391,0.174,0.494
+Happiness is a butterfly,Norman Fucking Rockwell!,0.467,0.119,-10.99,0.969,1.4e-6,70.499,0.0401,0.0973,0.156
+hope is a dangerous thing for a woman like me to have - but I have it,Norman Fucking Rockwell!,0.49,0.104,-13.208,0.964,0,86.675,0.0635,0.162,0.278
+White Dress,Chemtrails Over The Country Club,0.493,0.263,-12.805,0.926,0,122.792,0.0351,0.0879,0.158
+Chemtrails Over The Country Club,Chemtrails Over The Country Club,0.334,0.276,-13.125,0.877,2.49e-4,201.025,0.0643,0.113,0.429
+Tulsa Jesus Freak,Chemtrails Over The Country Club,0.387,0.339,-12.962,0.918,0.00272,137.199,0.0489,0.13,0.273
+Let Me Love You Like A Woman,Chemtrails Over The Country Club,0.303,0.249,-11.715,0.97,1.95e-5,66.932,0.111,0.117,0.131
+Wild At Heart,Chemtrails Over The Country Club,0.397,0.206,-12.487,0.947,1.35e-5,120.702,0.0389,0.119,0.27
+Dark But Just A Game,Chemtrails Over The Country Club,0.397,0.262,-14.608,0.842,6.6e-6,80.434,0.0916,0.0999,0.124
+Not All Who Wander Are Lost,Chemtrails Over The Country Club,0.445,0.116,-14.87,0.947,1.69e-5,167.992,0.0368,0.11,0.139
+Yosemite,Chemtrails Over The Country Club,0.584,0.283,-12.893,0.901,0.0332,106.068,0.0309,0.127,0.278
+Breaking Up Slowly,Chemtrails Over The Country Club,0.37,0.314,-9.677,0.912,2.09e-6,97.4,0.0445,0.0989,0.221
+Dance Till We Die,Chemtrails Over The Country Club,0.359,0.236,-13.46,0.904,7.43e-6,126.227,0.0432,0.116,0.244
+For Free,Chemtrails Over The Country Club,0.502,0.105,-13.381,0.98,1.79e-5,114.043,0.0331,0.0725,0.203
+Text Book,Blue Banisters,0.424,0.318,-9.915,0.824,5.42e-4,119.396,0.0427,0.114,0.102
+Blue Banisters,Blue Banisters,0.373,0.114,-13.171,0.937,4.73e-5,90.945,0.041,0.104,0.172
+Arcadia,Blue Banisters,0.323,0.106,-10.374,0.97,5.94e-5,91.455,0.0323,0.108,0.158
+Interlude - The Trio,Blue Banisters,0.376,0.493,-14.03,6.89e-4,0.901,102.845,0.0372,0.153,0.119
+Black Bathing Suit,Blue Banisters,0.418,0.377,-11.612,0.852,4.61e-5,113.936,0.0738,0.374,0.283
+If You Lie Down With Me,Blue Banisters,0.641,0.346,-9.508,0.913,3.99e-5,122.101,0.036,0.104,0.187
+Beautiful,Blue Banisters,0.552,0.202,-10.685,0.96,0.00154,78.021,0.043,0.225,0.237
+Violets for Roses,Blue Banisters,0.513,0.21,-10.472,0.922,0,88.021,0.0301,0.123,0.14
+Dealer,Blue Banisters,0.602,0.59,-6.346,0.318,1.66e-4,130.08,0.0279,0.104,0.381
+Thunder,Blue Banisters,0.483,0.475,-8.442,0.674,0.00167,73.862,0.0291,0.115,0.237
+Wildflower Wildfire,Blue Banisters,0.547,0.205,-10.021,0.873,0.0502,105.745,0.0277,0.113,0.222
+Nectar Of The Gods,Blue Banisters,0.447,0.165,-9.275,0.888,1.4e-6,101.758,0.0342,0.177,0.122
+Living Legend,Blue Banisters,0.402,0.219,-9.244,0.935,0.0034,126.595,0.0318,0.102,0.166
+Cherry Blossom,Blue Banisters,0.413,0.119,-12.499,0.982,0.00219,111.11,0.0348,0.112,0.216
+Sweet Carolina,Blue Banisters,0.45,0.148,-11.802,0.976,4.09e-4,79.727,0.0569,0.107,0.0758
